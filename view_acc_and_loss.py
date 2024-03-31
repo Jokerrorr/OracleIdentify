@@ -1,5 +1,8 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+from train_model import save_dir
+
+acc_and_loss_dir = save_dir + '/acc_and_loss.csv'
 
 
 def save_acc_and_loss(val_acc_history, train_acc_history, valid_losses, train_losses):
@@ -12,12 +15,12 @@ def save_acc_and_loss(val_acc_history, train_acc_history, valid_losses, train_lo
     })
 
     # 保存到 CSV 文件
-    df.to_csv('acc_and_loss.csv', index_label='epoch')
+    df.to_csv(acc_and_loss_dir, index_label='epoch')
 
 
 def draw_acc_and_loss():
     # 从 CSV 文件中读取数据
-    df = pd.read_csv('acc_and_loss.csv')
+    df = pd.read_csv(acc_and_loss_dir)
 
     # 绘制准确率曲线
     plt.figure(figsize=(10, 5))
