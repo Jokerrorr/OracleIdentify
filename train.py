@@ -9,8 +9,8 @@ from net import net
 from train_model import train_model
 from view_acc_and_loss import *
 
-epochs = 10
-batch_size = 16
+epochs = 25
+batch_size = 64
 num_classes = 100
 learning_rate = 1e-2
 filename = 'checkpoint.pth'  # 模型保存文件
