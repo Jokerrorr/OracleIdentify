@@ -105,5 +105,5 @@ def train_model(model, dataloaders, criterion, optimizer, num_epochs, device, sc
 
     # 训练完后用最好的一次当做模型最终的结果返回
     model.load_state_dict(best_model_wts)
-    torch.save(model, 'model_dir')
+    torch.save(model, model_pt_dir)
     return model, val_acc_history, train_acc_history, valid_losses, train_losses
