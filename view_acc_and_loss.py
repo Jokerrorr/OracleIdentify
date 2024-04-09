@@ -2,6 +2,11 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from train_model import save_dir
 
+"""
+保存和可视化训练数据
+已有csv文件后直接运行该模块即可查看数据
+"""
+
 acc_and_loss_dir = save_dir + '/acc_and_loss.csv'
 
 

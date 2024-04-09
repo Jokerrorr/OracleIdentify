@@ -2,10 +2,15 @@ import os
 import random
 import shutil
 
+"""
+由于原始数据路径类似data/label/label_i.png,而我们需要将其分为训练集和验证集,即目标路径为data/train/label/label_i.png和data/valid/label/label_j.png
+通过运行此文件，可以将原始数据按照一定比例分类为训练集和验证集
+"""
+
 # 数据集的根目录
 data_root = 'data'
 
-# 训练集和验证集的比例
+# 训练集占总数据集的比例
 train_ratio = 0.8
 
 # 获取所有类别的文件夹

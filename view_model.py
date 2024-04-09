@@ -7,6 +7,7 @@ from train_model import model_pt_dir, save_dir
 需要安装graphviz（安装教程：https://zhuanlan.zhihu.com/p/268532582）
 直接运行可能出错，可以在终端中使用命令python view_model.py
 """
+
 model_dir = save_dir + '/model'
 # 加载模型
 model = torch.load(model_pt_dir)

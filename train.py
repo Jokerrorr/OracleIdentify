@@ -9,6 +9,10 @@ from net import net
 from train_model import train_model, save_dir
 from view_acc_and_loss import *
 
+"""
+用于训练的主要脚本
+"""
+
 epochs = 10
 batch_size = 64
 num_classes = 100

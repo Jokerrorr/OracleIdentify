@@ -3,14 +3,12 @@ import copy
 import torch
 import os
 
+"""
+用于训练的函数
+"""
+
 save_dir = 'save_train_data'
 model_pt_dir = save_dir + '/model.pt'
-
-
-def have_checkpoint(filename):
-    if os.path.exists(filename):
-        return True
-    return False
 
 
 # 训练模型的主要函数
@@ -19,7 +17,7 @@ def train_model(model, dataloaders, criterion, optimizer, num_epochs, device, sc
     best_acc = 0
 
     # 如果有checkpoint则加载模型
-    if have_checkpoint(filename):
+    if os.path.exists(filename):
         checkpoint = torch.load(filename)
         best_acc = checkpoint['best_acc']
         model.load_state_dict(checkpoint['state_dict'])
