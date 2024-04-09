@@ -27,7 +27,7 @@ if __name__ == '__main__':
 
     # 初始化数据
     data_transforms = {
-        'train': transforms.Compose([transforms.RandomRotation(45),  # 随机旋转，-45到45度之间随机选
+        'train': transforms.Compose([transforms.RandomRotation(45),
                                      transforms.Resize(224),
                                      transforms.ColorJitter(brightness=0.2, contrast=0.1, saturation=0.1, hue=0.1),
                                      transforms.ToTensor(),
