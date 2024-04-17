@@ -1,4 +1,4 @@
-from torchvision import transforms, datasets
+from torchvision import transforms
 from PIL import Image
 import torch
 import pickle
@@ -21,13 +21,13 @@ def predict(image_dir):  # image_dir传入需要预测的图路径
     image = Image.open(image_dir)
     image = transform(image)
     image = image.unsqueeze(0)  # 在第0维增加一个维度，代表批处理维度
-    # image.to(device)
+    image = image.to(device)
 
     # 加载模型
     model = net(num_classes)
-    checkpoint = torch.load(filename)
+    checkpoint = torch.load(filename, map_location=device)
     model.load_state_dict(checkpoint['state_dict'])
-    # model.to(device)
+    model = model.to(device)
     model.eval()
 
     # 识别并返回结果
