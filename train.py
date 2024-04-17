@@ -1,4 +1,5 @@
 import os
+import pickle
 
 import torch
 import torch.optim as optim
@@ -44,6 +45,11 @@ if __name__ == '__main__':
                    ['train', 'valid']}
     dataset_sizes = {x: len(image_datasets[x]) for x in ['train', 'valid']}
     class_names = image_datasets['train'].classes
+
+    # 使用'rb'模式打开文件以读取二进制数据
+    with open(save_dir+'/class_names.pkl', 'wb') as f:
+        # 使用pickle.dump()来存储列表
+        pickle.dump(class_names, f)
 
     # 是否用GPU训练
     train_on_gpu = torch.cuda.is_available()
