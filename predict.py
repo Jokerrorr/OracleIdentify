@@ -33,8 +33,9 @@ def predict(image_dir):  # image_dir传入需要预测的图路径
     # 识别并返回结果
     with torch.no_grad():
         outputs = model(image)
-        _, prediction = torch.max(outputs, 1)
-        prediction_label = class_names[prediction]
+        probabilities = torch.softmax(outputs, dim=1)[0]
+        _, prediction = torch.topk(outputs, 5)
+        prediction_label = [(class_names[idx.item()], probabilities[idx].item()) for idx in prediction[0]]
         return prediction_label
 
 

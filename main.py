@@ -2,6 +2,7 @@
 后续用于的加载模型进行测试与GUI的实现
 """
 import tkinter as tk
+import tkinter.ttk as ttk
 from PIL import Image, ImageDraw
 import os
 from datetime import datetime
@@ -67,7 +68,19 @@ class HandwritingBoard:
     def submit(self):
         self.save_image()
         image_path = "saved image\\" + os.listdir("saved image")[-1]
-        messagebox.showinfo("结果", f"图像识别为: {predict(image_path)}")
+        pred=predict(image_path)
+        prediction_window = tk.Toplevel(self.master)
+        prediction_window.title("Prediction Results")
+
+        prediction_table = ttk.Treeview(prediction_window, columns=('Class', 'Probability'))
+        prediction_table.heading('#0', text='Rank')
+        prediction_table.heading('Class', text='Class')
+        prediction_table.heading('Probability', text='Probability')
+        prediction_table.pack(pady=10)
+
+        for idx, (class_name, probability) in enumerate(pred, start=1):
+            prediction_table.insert("", 'end', text=str(idx), values=(class_name, f"{probability:.2f}"))
+
 
 
 def main():
