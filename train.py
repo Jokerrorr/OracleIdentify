@@ -6,29 +6,40 @@ import torch.optim as optim
 from torch import nn
 from torchvision import transforms, datasets
 
-from net import net
+from net import net, TeacherNet
 from train_model import train_model, save_dir
 from view_acc_and_loss import *
+from nst import NST
 
 """
 用于训练的主要脚本
 """
 
 epochs = 10
-batch_size = 64
+batch_size = 32
 num_classes = 100
-learning_rate = 1e-2
-filename = save_dir + '/checkpoint.pth'  # 模型保存文件
+learning_rate = 1e-3
+filename_s = save_dir + '/checkpoint_s.pth'  # 学生模型保存文件
+filename_t = save_dir + '/checkpoint_t.pth' # 教师模型保存文件
 
-if __name__ == '__main__':
+#NST知识蒸馏参数
+lambda_kd = 1.0 #蒸馏loss的比重
+
+#IsTeacher为True训练教师模型, False训练学生模型
+#UseTeacher为True使用教师模型知识蒸馏学生模型, 否则不启用
+IsTeacher = False
+UseTeacher = True
+
+def train_main(IsTeacher = False, UseTeacher = False):
     # 数据路径
     data_dir = 'data'
     train_dir = data_dir + '/train'
     valid_dir = data_dir + '/valid'
-
+    filename = filename_t if IsTeacher else filename_s
+    
     # 初始化数据
     data_transforms = {
-        'train': transforms.Compose([transforms.RandomRotation(45),
+        'train': transforms.Compose([transforms.RandomRotation(15),
                                      transforms.Resize(224),
                                      transforms.ColorJitter(brightness=0.2, contrast=0.1, saturation=0.1, hue=0.1),
                                      transforms.ToTensor(),
@@ -60,7 +71,7 @@ if __name__ == '__main__':
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
     # 初始化model
-    model = net(num_classes)
+    model = TeacherNet(num_classes) if IsTeacher else net(num_classes)
     # GPU计算
     model = model.to(device)
     # 优化器设置
@@ -68,6 +79,23 @@ if __name__ == '__main__':
     scheduler = None
     # scheduler = optim.lr_scheduler.StepLR(optimizer, 20, 0.1)
     criterion = nn.NLLLoss()
+
+    #设置教师model
+    model_t = None
+    criterionKD = None
+    if UseTeacher:
+        try:
+            checkpoint_t = torch.load(filename_t)
+        except:
+            raise RuntimeError('Not Found pth file of teacher model')
+        model_t = TeacherNet(num_classes)
+        try:
+            model_t.load_state_dict(checkpoint_t['state_dict'])
+        except:
+            raise RuntimeError('Teacher model loading failed')
+        model_t = model_t.to(device)
+        #设置NST知识蒸馏损失
+        criterionKD = NST()
 
     """
     在此处设置需要更新梯度的参数,如果不设置则只会更新fc层
@@ -90,8 +118,13 @@ if __name__ == '__main__':
                                                                                         num_epochs=epochs,
                                                                                         device=device,
                                                                                         scheduler=scheduler,
-                                                                                        filename=filename)
-
+                                                                                        filename=filename,
+                                                                                        model_t=model_t,
+                                                                                        criterionKD=criterionKD,
+                                                                                        lambda_kd=lambda_kd)
     # 绘图
     save_acc_and_loss(val_acc_history, train_acc_history, valid_losses, train_losses)
     draw_acc_and_loss()
+
+if __name__ == '__main__':
+    train_main(IsTeacher, UseTeacher)

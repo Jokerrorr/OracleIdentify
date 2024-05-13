@@ -4,7 +4,7 @@ import torch
 import pickle
 
 from net import net
-from train import filename, num_classes, save_dir
+from train import filename_s as filename, num_classes, save_dir
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -32,14 +32,13 @@ def predict(image_dir):  # image_dir传入需要预测的图路径
 
     # 识别并返回结果
     with torch.no_grad():
-        outputs = model(image)
-        probabilities = torch.softmax(outputs, dim=1)[0]
-        _, prediction = torch.topk(outputs, 5)
-        prediction_label = [(class_names[idx.item()], probabilities[idx].item()) for idx in prediction[0]]
+        _, outputs = model(image) #替换forward后多一个输出
+        _, prediction = torch.max(outputs, 1)
+        prediction_label = class_names[prediction]
         return prediction_label
 
 
 if __name__ == '__main__':
-    image_dir = 'data/valid/60A0A/60A0A_13.png'
+    image_dir = 'data/valid/60A00/60A00_8.png'
     p = predict(image_dir)
     print(p)

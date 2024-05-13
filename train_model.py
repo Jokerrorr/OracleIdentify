@@ -2,6 +2,7 @@ import time
 import copy
 import torch
 import os
+from nst import NST
 
 """
 用于训练的函数
@@ -12,7 +13,7 @@ model_pt_dir = save_dir + '/model.pt'
 
 
 # 训练模型的主要函数
-def train_model(model, dataloaders, criterion, optimizer, num_epochs, device, scheduler=None, filename=None):
+def train_model(model, dataloaders, criterion, optimizer, num_epochs, device, scheduler=None, filename=None, **options):
     since = time.time()  # 记录开始时间
     best_acc = 0
 
@@ -38,6 +39,13 @@ def train_model(model, dataloaders, criterion, optimizer, num_epochs, device, sc
         print('-' * 10)
         print(f'Epoch {epoch + 1}/{num_epochs}')
 
+        #若options参数传入教师模型
+        model_t = options['model_t']
+        criterionKD = options['criterionKD']
+        lambda_kd = options['lambda_kd']
+        if model_t:
+            model_t.eval()
+
         # 训练和验证
         for phase in ['train', 'valid']:
             if phase == 'train':
@@ -57,8 +65,16 @@ def train_model(model, dataloaders, criterion, optimizer, num_epochs, device, sc
                 optimizer.zero_grad()
                 # 只有训练的时候计算和更新梯度
                 with torch.set_grad_enabled(phase == 'train'):
-                    outputs = model(images)
+                    #替换后的forward函数输出池化特征和分类结果
+                    fea_s, outputs = model(images) 
                     loss = criterion(outputs, labels)
+
+                    #若存在教师模型并处于训练,增加NST蒸馏损失
+                    if model_t and phase == 'train':
+                        #输出教师的池化特征和分类结果
+                        fea_t, outputs_t = model_t(images)
+                        loss += criterionKD(fea_s, fea_t.detach())*lambda_kd #detach()防止反向传播
+
                     _, preds = torch.max(outputs, 1)
                     if phase == 'train':  # 训练时更新权重
                         loss.backward()
