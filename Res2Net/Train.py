@@ -1,3 +1,4 @@
+import copy
 import pickle
 
 import torch.optim as optim
@@ -65,9 +66,15 @@ def val(model, device, test_loader):
         correct = correct.data.item()
         acc = correct / total_num
         avgloss = test_loss / len(test_loader)
-        if acc > Best_ACC:
-            torch.save(model, 'save_train_data/best.pth')
+
+        if acc > Best_ACC:  # 以验证集的准确率为指标，越高越好
             Best_ACC = acc
+            state = {
+                'state_dict': model.state_dict(),
+                'best_acc': Best_ACC,
+                'optimizer': optimizer.state_dict(),
+            }
+            torch.save(state, 'save_train_data/best.pth')
         print('\nVal set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
             avgloss, correct, len(test_loader.dataset), 100 * acc))
         return acc
@@ -109,18 +116,11 @@ def show_as_image():
 
 
 if __name__ == '__main__':
-    # 创建保存模型的文件夹
-    file_dir = 'res2net'
-    if os.path.exists(file_dir):
-        print('true')
-        os.makedirs(file_dir, exist_ok=True)
-    else:
-        os.makedirs(file_dir)
 
     # 设置全局参数
     modellr = 1e-4
     BATCH_SIZE = 16
-    EPOCHS = 5
+    EPOCHS = 20
     DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     # 数据预处理7
@@ -142,10 +142,13 @@ if __name__ == '__main__':
     # 读取数据
     dataset_train = datasets.ImageFolder('data\\train', transform=transform)
     dataset_test = datasets.ImageFolder("data\\valid", transform=transform_test)
-    class_names = []
+
+    class_names = dataset_train.classes
+
     with open('save_train_data/class_names.pkl', 'wb') as f:
         # 使用pickle.dump()来存储列表
         pickle.dump(class_names, f)
+
     # 导入数据
     train_loader = torch.utils.data.DataLoader(dataset_train, batch_size=BATCH_SIZE, shuffle=True)
     test_loader = torch.utils.data.DataLoader(dataset_test, batch_size=BATCH_SIZE, shuffle=False)
@@ -154,7 +157,6 @@ if __name__ == '__main__':
     criterion = nn.CrossEntropyLoss()
 
     model_ft = res2net50()
-    print(model_ft)  # 打印ResNet18的结构
 
     num_ftrs = model_ft.fc.in_features
     model_ft.fc = nn.Linear(num_ftrs, 100)
@@ -172,7 +174,6 @@ if __name__ == '__main__':
         val_acc_list.append(acc)
         with open('save_train_data/result.csv', 'w', encoding='utf-8') as file:
             file.write(json.dumps(val_acc_list))
-    torch.save(model_ft, 'save_train_data/model_final.pth')
 
     save_acc_and_loss(val_acc_list, ave_loss_list)
     show_as_image()

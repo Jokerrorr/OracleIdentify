@@ -79,6 +79,7 @@ def train_model(model, dataloaders, criterion, optimizer, num_epochs, device, sc
                     if phase == 'train':  # 训练时更新权重
                         loss.backward()
                         optimizer.step()
+                        scheduler.step()
                 # 计算损失
                 running_loss += loss.item() * images.size(0)
                 running_corrects += torch.sum(preds == labels.data)

@@ -51,7 +51,6 @@ if __name__ == '__main__':
     with open(save_dir + '/class_names.pkl', 'wb') as f:
         # 使用pickle.dump()来存储列表
         pickle.dump(class_names, f)
-
     # 是否用GPU训练
     train_on_gpu = torch.cuda.is_available()
     if not train_on_gpu:

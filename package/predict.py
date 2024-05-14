@@ -32,7 +32,7 @@ def predict(image_dir, topk, model, class_names_pkl_dir,
 
 
 if __name__ == '__main__':
-    image_dir = '../data/valid/60A0A/60A0A_12.png'
+    image_dir = '../resnet18/data/valid/60A0A/60A0A_12.png'
 
     topk = 10
 
