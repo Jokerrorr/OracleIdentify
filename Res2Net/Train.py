@@ -138,12 +138,12 @@ if __name__ == '__main__':
     ])
 
     # 读取数据
-    dataset_train = datasets.ImageFolder('E:\\OracleIdentify-master\\data\\train', transform=transform)
-    dataset_test = datasets.ImageFolder("E:\\OracleIdentify-master\\data\\valid", transform=transform_test)
+    dataset_train = datasets.ImageFolder('data\\train', transform=transform)
+    dataset_test = datasets.ImageFolder("ata\\valid", transform=transform_test)
 
-    with open('class.txt', 'w') as file:
+    with open('save_train_data/class.txt', 'w') as file:
         file.write(str(dataset_train.class_to_idx))
-    with open('class.json', 'w', encoding='utf-8') as file:
+    with open('save_train_data/class.json', 'w', encoding='utf-8') as file:
         file.write(json.dumps(dataset_train.class_to_idx))
     # 导入数据
     train_loader = torch.utils.data.DataLoader(dataset_train, batch_size=BATCH_SIZE, shuffle=True)
@@ -169,7 +169,7 @@ if __name__ == '__main__':
         cosine_schedule.step()
         acc = val(model_ft, DEVICE, test_loader)
         val_acc_list.append(acc)
-        with open('result.csv', 'w', encoding='utf-8') as file:
+        with open('save_train_data/result.csv', 'w', encoding='utf-8') as file:
             file.write(json.dumps(val_acc_list))
     torch.save(model_ft, 'res2net/model_final.pth')
 

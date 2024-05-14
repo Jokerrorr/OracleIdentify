@@ -10,6 +10,13 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="\Res2Net\save_train_data\valAcc_and_aveLoss.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="\resnet18\save_train_data\acc_and_loss.csv">
           <value>
             <Attribute>
