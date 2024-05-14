@@ -1,3 +1,5 @@
+import pickle
+
 import torch.optim as optim
 import torch
 import torch.nn as nn
@@ -64,7 +66,7 @@ def val(model, device, test_loader):
         acc = correct / total_num
         avgloss = test_loss / len(test_loader)
         if acc > Best_ACC:
-            torch.save(model, file_dir + '/' + 'best.pth')
+            torch.save(model, 'save_train_data/best.pth')
             Best_ACC = acc
         print('\nVal set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
             avgloss, correct, len(test_loader.dataset), 100 * acc))
@@ -118,7 +120,7 @@ if __name__ == '__main__':
     # 设置全局参数
     modellr = 1e-4
     BATCH_SIZE = 16
-    EPOCHS = 50
+    EPOCHS = 5
     DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     # 数据预处理7
@@ -139,12 +141,11 @@ if __name__ == '__main__':
 
     # 读取数据
     dataset_train = datasets.ImageFolder('data\\train', transform=transform)
-    dataset_test = datasets.ImageFolder("ata\\valid", transform=transform_test)
-
-    with open('save_train_data/class.txt', 'w') as file:
-        file.write(str(dataset_train.class_to_idx))
-    with open('save_train_data/class.json', 'w', encoding='utf-8') as file:
-        file.write(json.dumps(dataset_train.class_to_idx))
+    dataset_test = datasets.ImageFolder("data\\valid", transform=transform_test)
+    class_names = []
+    with open('save_train_data/class_names.pkl', 'wb') as f:
+        # 使用pickle.dump()来存储列表
+        pickle.dump(class_names, f)
     # 导入数据
     train_loader = torch.utils.data.DataLoader(dataset_train, batch_size=BATCH_SIZE, shuffle=True)
     test_loader = torch.utils.data.DataLoader(dataset_test, batch_size=BATCH_SIZE, shuffle=False)
@@ -171,7 +172,7 @@ if __name__ == '__main__':
         val_acc_list.append(acc)
         with open('save_train_data/result.csv', 'w', encoding='utf-8') as file:
             file.write(json.dumps(val_acc_list))
-    torch.save(model_ft, 'res2net/model_final.pth')
+    torch.save(model_ft, 'save_train_data/model_final.pth')
 
     save_acc_and_loss(val_acc_list, ave_loss_list)
     show_as_image()
