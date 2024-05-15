@@ -66,19 +66,20 @@ def train_model(model, dataloaders, criterion, optimizer, num_epochs, device, sc
                 # 只有训练的时候计算和更新梯度
                 with torch.set_grad_enabled(phase == 'train'):
                     # 替换后的forward函数输出池化特征和分类结果
-                    fea_s, outputs = model(images)
+                    l4_s, fea_s, outputs = model(images)
                     loss = criterion(outputs, labels)
 
                     # 若存在教师模型并处于训练,增加NST蒸馏损失
                     if model_t and phase == 'train':
                         # 输出教师的池化特征和分类结果
-                        fea_t, outputs_t = model_t(images)
-                        loss += criterionKD(fea_s, fea_t.detach()) * lambda_kd  # detach()防止反向传播
+                        l4_t, fea_t, outputs_t = model_t(images)
+                        loss += criterionKD(l4_s, l4_t.detach()) * lambda_kd  # detach()防止反向传播
 
                     _, preds = torch.max(outputs, 1)
                     if phase == 'train':  # 训练时更新权重
                         loss.backward()
                         optimizer.step()
+                        scheduler.step()
                 # 计算损失
                 running_loss += loss.item() * images.size(0)
                 running_corrects += torch.sum(preds == labels.data)

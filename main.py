@@ -3,13 +3,16 @@
 """
 import tkinter as tk
 import tkinter.ttk as ttk
-from PIL import Image, ImageDraw
+from tkinter import filedialog
+
+from PIL import Image, ImageDraw, ImageTk
 import os
 from datetime import datetime
 import tkinter.messagebox as messagebox
 from package.predict import predict
 import torch
 from resnet18.net import net
+from Res2Net.Res2Net import res2net50
 
 
 class HandwritingBoard:
@@ -17,7 +20,7 @@ class HandwritingBoard:
         self.canvas_length = 600
         self.master = master
         self.master.title("手写板")
-        self.canvas = tk.Canvas(self.master, width=self.canvas_length, height=self.canvas_length, bg="light yellow")
+        self.canvas = tk.Canvas(self.master, width=self.canvas_length, height=self.canvas_length, bg="white")
         self.canvas.pack(side="left", fill=tk.BOTH, expand=True)
 
         self.canvas.bind("<B1-Motion>", self.draw)
@@ -31,6 +34,9 @@ class HandwritingBoard:
 
         self.submit_button = tk.Button(self.master, text="识别绘图", command=self.submit)
         self.submit_button.pack()
+
+        self.choose_button = tk.Button(self.master, text="本地上传", command=self.choose_image)
+        self.choose_button.pack()
 
         self.image = Image.new("RGB", (self.canvas_length, self.canvas_length), "white")
         self.draw = ImageDraw.Draw(self.image)
@@ -73,15 +79,14 @@ class HandwritingBoard:
         topk = 10
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-        model = net(300)
-        checkpoint_dir = "resnet18/save_train_data/checkpoint.pth"
+        model = res2net50()
+        checkpoint_dir = "Res2Net/save_train_data/best.pth"
         checkpoint = torch.load(checkpoint_dir, map_location=device)
         model.load_state_dict(checkpoint['state_dict'])
         model = model.to(device)
         model.eval()
 
-        class_names_pkl_dir = "resnet18/save_train_data/class_names.pkl"
-
+        class_names_pkl_dir = "Res2Net/save_train_data/class_names.pkl"
         pred = predict(image_dir, topk, model, class_names_pkl_dir, device)
 
         prediction_window = tk.Toplevel(self.master)
@@ -96,6 +101,42 @@ class HandwritingBoard:
         for idx, (class_name, probability) in enumerate(pred, start=1):
             prediction_table.insert("", 'end', text=str(idx), values=(class_name, f"{probability:.2f}"))
 
+    def choose_image(self):
+        file_path = filedialog.askopenfilename(initialdir="/", title="选择图片文件", filetypes=(
+            ("PNG files", "*.png"), ("JPEG files", "*.jpg"), ("All files", "*.*")))
+        if file_path:
+            # 清除之前的绘画
+            self.canvas.delete("all")
+            # 加载用户选择的图片文件
+            image = Image.open(file_path)
+            # 在画布上显示图片
+            self.canvas.image = ImageTk.PhotoImage(image)
+            self.canvas.create_image(0, 0, anchor="nw", image=self.canvas.image)
+        image_dir = file_path
+        topk = 10
+        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
+        model = res2net50()
+        checkpoint_dir = "Res2Net/save_train_data/best.pth"
+        checkpoint = torch.load(checkpoint_dir, map_location=device)
+        model.load_state_dict(checkpoint['state_dict'])
+        model = model.to(device)
+        model.eval()
+
+        class_names_pkl_dir = "Res2Net/save_train_data/class_names.pkl"
+        pred = predict(image_dir, topk, model, class_names_pkl_dir, device)
+
+        prediction_window = tk.Toplevel(self.master)
+        prediction_window.title("Prediction Results")
+
+        prediction_table = ttk.Treeview(prediction_window, columns=('Class', 'Probability'))
+        prediction_table.heading('#0', text='Rank')
+        prediction_table.heading('Class', text='Class')
+        prediction_table.heading('Probability', text='Probability')
+        prediction_table.pack(pady=10)
+
+        for idx, (class_name, probability) in enumerate(pred, start=1):
+            prediction_table.insert("", 'end', text=str(idx), values=(class_name, f"{probability:.2f}"))
 
 def main():
     root = tk.Tk()

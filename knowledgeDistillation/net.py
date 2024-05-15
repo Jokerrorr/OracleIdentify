@@ -1,6 +1,13 @@
+import sys
+<<<<<<< HEAD
+=======
+
+>>>>>>> 9633feafb276d18ae44feceff791806f83d50d31
+sys.path.append('..')
 from torchvision import models
 import torch.nn as nn
 from functools import partial
+from Res2Net.Res2Net import res2net50_26w_4s
 
 """
 模型
@@ -23,7 +30,7 @@ def forward(self, x):
     fea = p_out.view(p_out.size(0), -1)
     out = self.fc(fea)
 
-    return fea, out
+    return l4, fea, out
 
 
 # 冻结所有参数(fc层除外)
@@ -32,21 +39,18 @@ def set_parameter_requires_grad(model):
         param.requires_grad = False
 
 
-def net(num_classes, use_pretrained=True):  # use_pretrained：是否使用预训练模型
+def net(num_classes, use_pretrained=False):  # use_pretrained：是否使用预训练模型
     model = models.resnet18(pretrained=use_pretrained)
     model.forward = partial(forward, model)  # 替换forward
     set_parameter_requires_grad(model)
     num_ftrs = model.fc.in_features
-    model.fc = nn.Sequential(nn.Linear(num_ftrs, num_classes),
-                             nn.LogSoftmax(dim=1))
+    model.fc = nn.Linear(num_ftrs, num_classes)
     return model
 
-
 def TeacherNet(num_classes, use_pretrained=True):  # 教师模型,用于模型蒸馏
-    model = models.resnet152(pretrained=use_pretrained)
+    model = res2net50_26w_4s(pretrained=use_pretrained)
     model.forward = partial(forward, model)  # 替换forward
     set_parameter_requires_grad(model)
     num_ftrs = model.fc.in_features
-    model.fc = nn.Sequential(nn.Linear(num_ftrs, num_classes),
-                             nn.LogSoftmax(dim=1))
+    model.fc = nn.Linear(num_ftrs, num_classes)
     return model
