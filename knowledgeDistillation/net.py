@@ -1,8 +1,5 @@
 import sys
-<<<<<<< HEAD
-=======
 
->>>>>>> 9633feafb276d18ae44feceff791806f83d50d31
 sys.path.append('..')
 from torchvision import models
 import torch.nn as nn

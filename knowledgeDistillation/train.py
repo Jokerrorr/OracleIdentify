@@ -32,10 +32,6 @@ lambda_kd = 1.0  # 蒸馏loss的比重
 IsTeacher = False
 UseTeacher = True
 
-<<<<<<< HEAD
-=======
-
->>>>>>> 9633feafb276d18ae44feceff791806f83d50d31
 def train():
     # 数据路径
     data_dir = 'data'
@@ -83,10 +79,7 @@ def train():
     # 优化器设置
     optimizer = optim.Adam(model.parameters(), lr=learning_rate)
     criterion = nn.CrossEntropyLoss()
-<<<<<<< HEAD
     scheduler = None
-=======
->>>>>>> 9633feafb276d18ae44feceff791806f83d50d31
 
     # 设置教师model
     model_t = None
@@ -143,10 +136,6 @@ def train():
         save_acc_and_loss_dir = save_dir + '/acc_and_loss_SnoT.csv'
     save_acc_and_loss(val_acc_history, train_acc_history, valid_losses, train_losses, save_acc_and_loss_dir)
     draw_acc_and_loss(save_acc_and_loss_dir)
-<<<<<<< HEAD
-=======
-
->>>>>>> 9633feafb276d18ae44feceff791806f83d50d31
 
 if __name__ == '__main__':
     train()
