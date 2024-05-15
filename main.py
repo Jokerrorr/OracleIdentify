@@ -11,9 +11,11 @@ from datetime import datetime
 import tkinter.messagebox as messagebox
 from package.predict import predict
 import torch
+import torch.nn as nn
 from resnet18.net import net
 from Res2Net.Res2Net import res2net50
 
+num_classes = 100
 
 class HandwritingBoard:
     def __init__(self, master):
@@ -80,6 +82,8 @@ class HandwritingBoard:
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
         model = res2net50()
+        num_ftrs = model.fc.in_features
+        model.fc = nn.Linear(num_ftrs, num_classes)
         checkpoint_dir = "Res2Net/save_train_data/best.pth"
         checkpoint = torch.load(checkpoint_dir, map_location=device)
         model.load_state_dict(checkpoint['state_dict'])
@@ -117,6 +121,8 @@ class HandwritingBoard:
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
         model = res2net50()
+        num_ftrs = model.fc.in_features
+        model.fc = nn.Linear(num_ftrs, num_classes)
         checkpoint_dir = "Res2Net/save_train_data/best.pth"
         checkpoint = torch.load(checkpoint_dir, map_location=device)
         model.load_state_dict(checkpoint['state_dict'])
